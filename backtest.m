@@ -38,7 +38,7 @@ for k=1:length(parameters.markets)
     open = cat(2, open, hist_data{2});
 end
 n = length(dates);
-retrn=zeros(1,n);
+returns=zeros(1,n);
 
 balance=1000;
 stocks=0;
@@ -47,8 +47,8 @@ bc=balance;
 
 for k=1:(n-1)
     bp=bc;
-    [position,~] = strategy(close(1:k), parameters);
-    switch (position)
+    [positions,~] = strategy(close(1:k), parameters);
+    switch (positions(1))
         case 1
             if(balance>0)
                 stocks=balance/open(k+1);
@@ -66,16 +66,16 @@ for k=1:(n-1)
     if(balance==0)
         bc=stocks*close(k+1);
     end
-    retrn(k)=(bc-bp)/bp;
-    fprintf("%d\t%d\t%f\t%f\t%f\n", k, position, balance, stocks, retrn(k));
+    returns(k)=(bc-bp)/bp;
+    fprintf("%d\t%d\t%f\t%f\t%f\n", k, positions(1), balance, stocks, returns(k));
 end
 if(stocks~=0)
     balance=stocks*close(n);
     stocks=0;
 end
 
-[maxd, maxdd] = drawdowns(retrn);
+[maxd, maxdd] = drawdowns(returns);
 fprintf("Balance: %f\n", balance);
-fprintf("Sharpe ratio: %f\n", sharperatio(retrn,risk_free_return));
+fprintf("Sharpe ratio: %f\n", sharperatio(returns,risk_free_return));
 fprintf("Max drawdown: %f\nMax drawdown duration: %d\n", maxd, maxdd);
 end

@@ -1,5 +1,5 @@
-function [maxd,maxdd] = drawdowns(retrn)
-n = length(retrn);
+function [maxd,maxdd] = drawdowns(returns)
+n = length(returns);
 d=0;
 dd=0;
 maxd=0;
@@ -7,7 +7,7 @@ maxdd=0;
 current=1;
 peak=current;
 for i=1:n
-    current=current*(retrn(i)+1);
+    current=current*(returns(i)+1);
     if current>=peak
         peak=current;
         d=0;
