@@ -1,8 +1,20 @@
-function error = backtest(strategy,risk_free_return)
+function error = backtest(strategy,varargin)
 error=false;
 
-if nargin < 2
-    risk_free_return=0.05;
+risk_free_return=0.05;
+slippage=0.05;
+
+while ~isempty(varargin)
+    switch lower(varargin{1})
+        case 'risk_free_return'
+            risk_free_return = varargin{2};
+        case 'slippage'
+            slippage = varargin{2};
+        otherwise
+            error=true
+            return;
+    end
+    varargin (1:2)=[];
 end
 
 parameters = struct();
@@ -15,8 +27,11 @@ if length(parameters.markets)<1
     error=true;
     return;
 end
+
 close = [];
 open = [];
+high = [];
+low = [];
 for k=1:length(parameters.markets)
     f = fopen(strcat(parameters.markets{k}, '.csv'));
     hist_data = textscan(f, '%s %f %f %f %f %f %f', 'Delimiter', ',', 'HeaderLines', 1);
@@ -36,6 +51,8 @@ for k=1:length(parameters.markets)
     
     close = cat(2, close, hist_data{5});
     open = cat(2, open, hist_data{2});
+    high = cat(2, high, hist_data{3});
+    low = cat(2, low, hist_data{4});
 end
 n = length(dates);
 returns=zeros(1,n);
@@ -51,12 +68,12 @@ for k=1:(n-1)
     switch (positions(1))
         case 1
             if(balance>0)
-                stocks=balance/open(k+1);
+                stocks=balance/(open(k+1,1)+slippage*(high(k+1,1)-low(k+1,1)));
                 balance=0;
             end
         case -1
             if(stocks>0)
-                balance=stocks*open(k+1);
+                balance=stocks*(open(k+1,1)-slippage*(high(k+1,1)-low(k+1,1)));
                 stocks=0;
             end
     end
@@ -64,13 +81,13 @@ for k=1:(n-1)
         bc=balance;
     end
     if(balance==0)
-        bc=stocks*close(k+1);
+        bc=stocks*close(k+1,1);
     end
     returns(k)=(bc-bp)/bp;
     fprintf("%d\t%d\t%f\t%f\t%f\n", k, positions(1), balance, stocks, returns(k));
 end
 if(stocks~=0)
-    balance=stocks*close(n);
+    balance=stocks*close(n,1);
     stocks=0;
 end
 
