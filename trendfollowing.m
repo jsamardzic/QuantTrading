@@ -16,6 +16,9 @@ sma2=0.0;
 
 positions=zeros(nmarkets,1);
 
+equity=1;
+exposure=zeros(nmarkets,1);
+
 m1 = parameters.m1;
 m2 = parameters.m2;
 
