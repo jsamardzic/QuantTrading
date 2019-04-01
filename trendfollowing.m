@@ -1,12 +1,12 @@
 function [positions, parameters] = trendfollowing(close,parameters)
 if ~isfield(parameters, 'markets')
-    parameters.markets={'AAPL', 'IBM', 'MSFT'};
+    parameters.markets={'AAPL', 'NKE', 'MSFT'};
 end
 if ~isfield(parameters, 'm1')
-    parameters.m1=14;
+    parameters.m1=34;
 end
 if ~isfield(parameters, 'm2')
-    parameters.m2=20;
+    parameters.m2=190;
 end
 
 nmarkets = numel(parameters.markets);

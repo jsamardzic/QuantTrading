@@ -1,5 +1,5 @@
 function [maxd,maxdd] = drawdowns(returns)
-n = length(returns);
+n = numel(returns);
 d=0;
 dd=0;
 maxd=0;

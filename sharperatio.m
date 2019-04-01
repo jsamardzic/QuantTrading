@@ -1,5 +1,5 @@
 function y = sharperatio(returns,risk_free_return)
-n=length(returns);
+n=numel(returns);
 
 return_total=prod(1+returns);
 return_total=return_total-1;

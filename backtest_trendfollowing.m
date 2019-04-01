@@ -7,7 +7,7 @@ nm2=numel(m2);
 sr=zeros(nm1,nm2);
 
 parameters = struct();
-parameters.markets={'AAPL','IBM','MSFT'};
+parameters.markets={'AAPL','NKE','MSFT'};
 risk_free_return=0.0;
 slippage=0.05;
 verbose=false;

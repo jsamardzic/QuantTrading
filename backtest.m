@@ -32,7 +32,7 @@ if ~isfield(parameters, 'markets')
     error = true;
     return;
 end
-if length(parameters.markets)<1
+if numel(parameters.markets)<1
     error=true;
     return;
 end
@@ -41,30 +41,23 @@ close = [];
 open = [];
 high = [];
 low = [];
-for k=1:length(parameters.markets)
-    f = fopen(strcat('data/', parameters.markets{k}, '.csv'));
-    hist_data = textscan(f, '%s %f %f %f %f %f %f', 'Delimiter', ',', 'HeaderLines', 1);
-    fclose(f);
-    if k==1
-        dates = datenum(hist_data{1});
+for k=1:numel(parameters.markets)
+    vals = csvread(strcat('data/', parameters.markets{k}, '.csv'), 1, 1);
+    if k == 1
+        ndays = size(vals, 1);
     else
-        if length(hist_data{1})~=length(dates)
-            error=true;
-            return;
-        end
-        if ~all(datenum(hist_data{1})==dates)
+        if size(vals, 1) ~= ndays
             error = true;
             return;
         end
     end
+    open = cat(2, open, vals(:, 1));
+    high = cat(2, high, vals(:, 2));
+    low = cat(2, low, vals(:, 3));
+    close = cat(2, close, vals(:, 4));
     
-    close = cat(2, close, hist_data{5});
-    open = cat(2, open, hist_data{2});
-    high = cat(2, high, hist_data{3});
-    low = cat(2, low, hist_data{4});
 end
 
-ndays = length(dates);
 day_first=floor(days_range(1)*(ndays-1))+1;
 day_last=floor(days_range(2)*(ndays-1))+1;
 ndays=day_last-day_first+1;
@@ -72,7 +65,7 @@ close=close(day_first:day_last,:);
 open=open(day_first:day_last,:);
 high=high(day_first:day_last,:);
 low=low(day_first:day_last,:);
-nmarkets = length(parameters.markets);
+nmarkets = numel(parameters.markets);
 returns=zeros(1,ndays);
 
 equity=1;
