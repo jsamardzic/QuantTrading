@@ -1,15 +1,25 @@
-function error = backtest(strategy,varargin)
+function [error,sr] = backtest(strategy,varargin)
 error=false;
+sr=-Inf;
 
+parameters = struct();
 risk_free_return=0.05;
 slippage=0.05;
+verbose=true;
+days_range=[0,1];
 
 while ~isempty(varargin)
     switch lower(varargin{1})
+        case 'parameters'
+            parameters = varargin{2};
         case 'risk_free_return'
             risk_free_return = varargin{2};
         case 'slippage'
             slippage = varargin{2};
+        case 'verbose'
+            verbose = varargin{2};
+        case 'days_range'
+            days_range = varargin{2};
         otherwise
             error=true
             return;
@@ -17,7 +27,6 @@ while ~isempty(varargin)
     varargin (1:2)=[];
 end
 
-parameters = struct();
 [~,parameters] = strategy([],parameters);
 if ~isfield(parameters, 'markets')
     error = true;
@@ -33,7 +42,7 @@ open = [];
 high = [];
 low = [];
 for k=1:length(parameters.markets)
-    f = fopen(strcat(parameters.markets{k}, '.csv'));
+    f = fopen(strcat('data/', parameters.markets{k}, '.csv'));
     hist_data = textscan(f, '%s %f %f %f %f %f %f', 'Delimiter', ',', 'HeaderLines', 1);
     fclose(f);
     if k==1
@@ -54,7 +63,15 @@ for k=1:length(parameters.markets)
     high = cat(2, high, hist_data{3});
     low = cat(2, low, hist_data{4});
 end
+
 ndays = length(dates);
+day_first=floor(days_range(1)*(ndays-1))+1;
+day_last=floor(days_range(2)*(ndays-1))+1;
+ndays=day_last-day_first+1;
+close=close(day_first:day_last,:);
+open=open(day_first:day_last,:);
+high=high(day_first:day_last,:);
+low=low(day_first:day_last,:);
 nmarkets = length(parameters.markets);
 returns=zeros(1,ndays);
 
@@ -87,7 +104,7 @@ for k=2:ndays
         exposure(l)=nstocks*close(k,l)/equity;
     end
     
-    [positions,~] = strategy(close(1:k), parameters);
+    [positions,~] = strategy(close(1:k,:), parameters);
     if all(positions==0)
         exposure_next=zeros(nmarkets,1);
     else
@@ -95,8 +112,11 @@ for k=2:ndays
     end
 end
 
+sr = sharperatio(returns,risk_free_return);
 [maxd, maxdd] = drawdowns(returns);
-fprintf("Equity: %f\n", equity);
-fprintf("Sharpe ratio: %f\n", sharperatio(returns,risk_free_return));
-fprintf("Max drawdown: %f\nMax drawdown duration: %d\n", maxd, maxdd);
+if verbose
+    fprintf("Equity: %f\n", equity);
+    fprintf("Sharpe ratio: %f\n", sr);
+    fprintf("Max drawdown: %f\nMax drawdown duration: %d\n", maxd, maxdd);
+end
 end
