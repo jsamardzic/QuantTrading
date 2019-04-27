@@ -69,39 +69,39 @@ nmarkets = numel(parameters.markets);
 returns=zeros(1,ndays);
 
 equity=1;
-exposure=zeros(nmarkets,1);
-exposure_next=zeros(nmarkets,1);
+allocation=zeros(nmarkets,1);
+allocation_next=zeros(nmarkets,1);
 
 for k=2:ndays
     for l=1:nmarkets
-        gap_return=exposure(l)*(open(k,l)-close(k-1,l))/close(k-1,l);
+        gap_return=allocation(l)*(open(k,l)-close(k-1,l))/close(k-1,l);
         returns(k)=returns(k)+gap_return;
     end
     
     for l=1:nmarkets
-        slippage_return=abs(exposure_next(l)-exposure(l))*slippage*(high(k,l)-low(k,l))/close(k-1,l);
+        slippage_return=abs(allocation_next(l)-allocation(l))*slippage*(high(k,l)-low(k,l))/close(k-1,l);
         returns(k)=returns(k)-slippage_return;
     end
     
-    exposure=exposure_next;
+    allocation=allocation_next;
     
     for l=1:nmarkets
-        session_return=exposure(l)*(close(k,l)-open(k,l))/close(k-1,l);
+        session_return=allocation(l)*(close(k,l)-open(k,l))/close(k-1,l);
         returns(k)=returns(k)+session_return;
     end
     
     equity_prev=equity;
     equity=(1+returns(k))*equity_prev;
     for l=1:nmarkets
-        nstocks=exposure(l)*equity_prev/close(k-1,l);
-        exposure(l)=nstocks*close(k,l)/equity;
+        nstocks=allocation(l)*equity_prev/close(k-1,l);
+        allocation(l)=nstocks*close(k,l)/equity;
     end
     
     [positions,~] = strategy(close(1:k,:), parameters);
     if all(positions==0)
-        exposure_next=zeros(nmarkets,1);
+        allocation_next=zeros(nmarkets,1);
     else
-        exposure_next=positions/(sum(abs(positions)));
+        allocation_next=positions/(sum(abs(positions)));
     end
 end
 
