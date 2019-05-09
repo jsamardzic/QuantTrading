@@ -7,7 +7,7 @@ nm2=numel(m2);
 sr=zeros(nm1,nm2);
 
 parameters = struct();
-parameters.markets={'AAPL','AMZN','FB'};
+parameters.markets={'KO', 'MCD', 'SBUX'};
 risk_free_return=0.0;
 slippage=0.05;
 verbose=false;
@@ -21,7 +21,7 @@ for k1=1:nm1
             continue;
         end
         
-        [error, sr(k1,k2)]=backtest(@trendfollowing, 'parameters', ...
+        [error, sr(k1,k2)]=backtest(@meanreversion, 'parameters', ...
             parameters, 'risk_free_return', risk_free_return, ...
             'slippage', slippage, 'verbose', verbose, 'days_range', ...
             days_range);

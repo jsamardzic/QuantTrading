@@ -1,15 +1,16 @@
-function [positions, parameters] = trendfollowing(close,parameters)
+function [positions, parameters] = meanreversion(close,parameters)
 if ~isfield(parameters, 'markets')
-    parameters.markets={'AAPL', 'AMZN', 'FB'};
+    parameters.markets={'KO', 'MCD', 'SBUX'};
 end
 if ~isfield(parameters, 'm1')
-    parameters.m1=16;
+    parameters.m1=11;
 end
 if ~isfield(parameters, 'm2')
-    parameters.m2=48;
+    parameters.m2=29;
 end
 
 nmarkets = numel(parameters.markets);
+sma_quot=zeros(nmarkets,1);
 positions=zeros(nmarkets,1);
 
 if isempty(close)
@@ -41,11 +42,16 @@ for k=1:nmarkets
     end
     sma2=sma2/m2;
     
-    if (sma1 > sma2)
+    sma_quot(k)=sma1/sma2;
+end
+
+sma_quot_min=min(sma_quot);
+sma_quot_max=max(sma_quot);
+
+for k=1:nmarkets
+    if (sma_quot(k)==sma_quot_min)
         positions(k)=1;
-    elseif (sma1 < sma2)
+    elseif (sma_quot(k)==sma_quot_max)
         positions(k)=-1;
     end
 end
-
-
