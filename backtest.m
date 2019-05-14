@@ -27,7 +27,7 @@ while ~isempty(varargin)
     varargin (1:2)=[];
 end
 
-[~,parameters] = strategy([],parameters);
+[~,parameters] = strategy([],parameters,[]);
 if ~isfield(parameters, 'markets')
     error = true;
     return;
@@ -71,6 +71,7 @@ returns=zeros(1,ndays);
 equity=1;
 allocation=zeros(nmarkets,1);
 allocation_next=zeros(nmarkets,1);
+positions=zeros(nmarkets,1);
 
 for k=2:ndays
     for l=1:nmarkets
@@ -97,7 +98,7 @@ for k=2:ndays
         allocation(l)=nstocks*close(k,l)/equity;
     end
     
-    [positions,~] = strategy(close(1:k,:), parameters);
+    [positions,~] = strategy(close(1:k,:), parameters,positions);
     if all(positions==0)
         allocation_next=zeros(nmarkets,1);
     else

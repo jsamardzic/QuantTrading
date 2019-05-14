@@ -1,4 +1,4 @@
-function [positions, parameters] = meanreversion(close,parameters)
+function [positions, parameters] = meanreversion(close,parameters,positions)
 if ~isfield(parameters, 'markets')
     parameters.markets={'KO', 'MCD', 'SBUX'};
 end

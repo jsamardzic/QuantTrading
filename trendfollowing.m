@@ -1,4 +1,4 @@
-function [positions, parameters] = trendfollowing(close,parameters)
+function [positions, parameters] = trendfollowing(close,parameters,positions)
 if ~isfield(parameters, 'markets')
     parameters.markets={'AAPL', 'AMZN', 'FB'};
 end
